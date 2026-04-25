@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP3再生リスト（ページネーション上下表示）</title>
+    <style>
+        body {
+            font-family: "Hiragino Kaku Gothic Pro", "Noto Sans JP", sans-serif;
+            padding: 20px;
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .center-text {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .mp3-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            background: #fff;
+        }
+        .mp3-content {
+            flex-grow: 1;
+        }
+        .mp3-item h3 {
+            font-size: 16px;
+            margin: 0 0 10px 0;
+        }
+        audio {
+            width: 100%;
+        }
+        .status {
+            color: #d9534f;
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        /* お気に入りスタイル */
+        .favorite-box {
+            margin-left: 15px;
+        }
+        .favorite-box label {
+            cursor: pointer;
+            font-size: 28px;
+        }
+        .favorite-box input[type="checkbox"] + label:before {
+            content: '☆';
+            color: #ccc;
+        }
+        .favorite-box input[type="checkbox"]:checked + label:before {
+            content: '★';
+            color: #f1c40f;
+        }
+        .favorite-box input[type="checkbox"] {
+            display: none;
+        }
+        /* ページネーション */
+        .pagination {
+            text-align: center;
+            padding: 10px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 15px;
+        }
+        .pagination button {
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 8px 14px;
+            margin: 0 2px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+            border-radius: 4px;
+        }
+        .pagination button:hover:not(.active) {
+            background-color: #e2e6ea;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .info-image {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+        }
+        .footer-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+<img src="https://life-supporter.jp/sp/hxySQ4ff/ct5NJq8Z/images/XS012099.jpg" class="info-image">
+
+<h2>再生するまでの準備時間があります。少しお待ちください。</h2>
+<div class="center-text">３００曲の内の１５曲を選んでみました。</div>
+
+<h2 id="mainTitle">MP3再生リスト</h2>
+
+<div class="pagination top" id="paginationControlsTop"></div>
+<div class="center-text"><small>上部をスライドしてリストを選択してください。</small></div>
+
+<div class="container" id="mp3Container"></div>
+
+<div class="pagination bottom" id="paginationControlsBottom"></div>
+<div class="center-text"><small>スライドしてページを切り替えられます。</small></div>
+
+<script>
+    const mp3Data = [
+        ["軽快でお洒落な電子ピアノのテクノポップス", "103.mp3"],
+        ["ゆったりとしたオーケストラ楽曲", "105.mp3"],
+        ["美しいピアノメロディー", "117.mp3"],
+        ["落ち着いた雰囲気の大人なジャズ", "127.mp3"],
+        ["神秘的で温もりのある美しいヒーリング", "146.mp3"],
+        ["切なく美しいバイオリンピアノサウンド", "158.mp3"],
+        ["バイオリンクラシック", "168.mp3"],
+        ["水辺にいるようなヒーリング系ストリングス", "177.mp3"],
+        ["お洒落なピアノシンセ", "187.mp3"],
+        ["壮大で可愛らしいミュージック", "197.mp3"],
+        ["大人な雰囲気のスロージャズバラード", "210.mp3"],
+        ["キュートでかわいいメロディのポップス", "222.mp3"],
+        ["スウィートでウォームなバラード", "235.mp3"],
+        ["上品 おしゃれ ムード 穏やか 大人", "251.mp3"],
+        ["苦悩をこえて、愛がかなう。ラストシーン", "399.mp3"]
+    ];
+
+    const baseUrl = "https://life-supporter.jp/sp/hxySQ4ff/VjDWurLR/images/MP3/";
+    const mainTitle = document.getElementById("mainTitle");
+    const container = document.getElementById("mp3Container");
+    const paginationControlsTop = document.getElementById("paginationControlsTop");
+    const paginationControlsBottom = document.getElementById("paginationControlsBottom");
+    const FAVORITES_KEY = "mp3Favorites";
+
+    const ITEMS_PER_PAGE = 5;
+    const TOTAL_PAGES = Math.ceil(mp3Data.length / ITEMS_PER_PAGE);
+    let currentPage = 1;
+
+    function loadFavorites() {
+        try {
+            const stored = localStorage.getItem(FAVORITES_KEY);
+            return stored ? JSON.parse(stored) : {};
+        } catch (e) { return {}; }
+    }
+
+    function saveFavorites(favorites) {
+        try {
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        } catch (e) { console.error(e); }
+    }
+
+    let favorites = loadFavorites();
+
+    function handlePlayAttempt(audioElement, statusElement) {
+        if (audioElement.readyState >= 4) {
+            audioElement.play().catch(e => {});
+            statusElement.textContent = '';
+            return;
+        }
+        statusElement.textContent = '⌛ 準備中...';
+        audioElement.controls = false;
+        
+        const canplaythroughHandler = () => {
+            statusElement.textContent = '✅ 再生準備完了';
+            audioElement.controls = true;
+            audioElement.removeEventListener('canplaythrough', canplaythroughHandler);
+            audioElement.play().catch(e => {
+                statusElement.textContent = '✅ 再生準備完了 (再生ボタンを押してください)';
+            });
+        };
+        audioElement.addEventListener('canplaythrough', canplaythroughHandler);
+        audioElement.load();
+    }
+
+    function displayList(page) {
+        container.innerHTML = '';
+        const start = (page - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const pageData = mp3Data.slice(start, end);
+
+        pageData.forEach(([title, filename], index) => {
+            const item = document.createElement("div");
+            item.className = "mp3-item";
+            
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "mp3-content";
+
+            const titleElem = document.createElement("h3");
+            titleElem.textContent = `${start + index + 1}. ${title}`;
+
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.setAttribute('controlsList', 'nodownload');
+            audio.oncontextmenu = () => false;
+            
+            const source = document.createElement("source");
+            source.src = baseUrl + filename;
+            source.type = "audio/mpeg";
+            audio.appendChild(source);
+            
+            const statusDiv = document.createElement("div");
+            statusDiv.className = "status";
+            
+            audio.addEventListener('play', (e) => {
+                document.querySelectorAll('audio').forEach(a => {
+                    if (a !== audio && !a.paused) a.pause();
+                });
+                handlePlayAttempt(audio, statusDiv);
+            });
+
+            contentDiv.appendChild(titleElem);
+            contentDiv.appendChild(audio);
+            contentDiv.appendChild(statusDiv);
+
+            const favoriteBox = document.createElement("div");
+            favoriteBox.className = "favorite-box";
+            const checkboxId = `fav-${start + index}`;
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = checkboxId;
+            checkbox.checked = favorites[filename] || false;
+
+            const label = document.createElement("label");
+            label.htmlFor = checkboxId;
+
+            checkbox.addEventListener('change', (e) => {
+                favorites[filename] = e.target.checked;
+                saveFavorites(favorites);
+            });
+
+            favoriteBox.appendChild(checkbox);
+            favoriteBox.appendChild(label);
+            item.appendChild(contentDiv);
+            item.appendChild(favoriteBox);
+            container.appendChild(item);
+        });
+        
+        renderPaginationControls(page, paginationControlsTop);
+        renderPaginationControls(page, paginationControlsBottom);
+    }
+
+    function renderPaginationControls(activePage, targetElement) {
+        targetElement.innerHTML = '';
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '≪ 前へ';
+        prevButton.disabled = activePage === 1;
+        prevButton.onclick = () => changePage(activePage - 1);
+        targetElement.appendChild(prevButton);
+
+        for (let i = 1; i <= TOTAL_PAGES; i++) {
+            const button = document.createElement('button');
+            button.textContent = i;
+            if (i === activePage) button.classList.add('active');
+            button.onclick = () => changePage(i);
+            targetElement.appendChild(button);
+        }
+
+        const nextButton = document.createElement('button');
+        nextButton.textContent = '次へ ≫';
+        nextButton.disabled = activePage === TOTAL_PAGES;
+        nextButton.onclick = () => changePage(activePage + 1);
+        targetElement.appendChild(nextButton);
+    }
+
+    function changePage(page) {
+        if (page >= 1 && page <= TOTAL_PAGES) {
+            currentPage = page;
+            displayList(currentPage);
+            mainTitle.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    displayList(currentPage);
+</script>
+
+<div class="footer-section">
+    <p><b>今回のアプリは如何だったでしょうか？<br>
+    他にも使えるアプリ、脳トレができるゲームや趣味に俳句、和歌などが利用できるサイトをご案内します。</b></p>
+    <p><b>また大事な記録をサーバーに残せるサイトで、何かあった時に情報開示も指定できるサイトです。<br>
+    スマホのID、PWを記録しておくと安心です。</b></p>
+
+    <img src="https://life-supporter.jp/sp/hxySQ4ff/ct5NJq8Z/images/XS012085.jpg" class="info-image">
+
+    <div style="font-size: 24px; font-weight: bold; margin: 20px 0;">
+        以下より体験版をご確認ください。
+    </div>
+
+    <img src="https://life-supporter.jp/sp/hxySQ4ff/ct5NJq8Z/images/XS012100.jpg" style="width: 200px;">
+    
+    <div style="margin-top: 10px;">
+        <a href="https://life-supporter.jp/lp/HRSuykFf" style="font-size: 20px; color: #007bff; text-decoration: none; font-weight: bold;">
+            https://life-supporter.jp/lp/HRSuykFf
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
