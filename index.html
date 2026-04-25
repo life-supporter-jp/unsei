@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>至高の毎日占い</title>
     <style>
-        /* --- 1. ページ全体の設定（最大幅800pxで中央寄せ） --- */
+        /* --- 1. ページ全体の設定（最大幅800px・中央寄せ） --- */
         body { 
             font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; 
             background: #f4f7f9; 
             color: #2c3e50; 
             line-height: 1.6; 
-            margin: 0 auto;       /* 左右中央寄せ */
+            margin: 0 auto;       /* 左右をオートにして中央寄せ */
             padding: 15px; 
             font-size: 18px; 
             max-width: 800px;     /* 全体の幅を800pxに制限 */
@@ -19,10 +19,10 @@
             overflow-x: hidden;   /* 横揺れ防止 */
         }
 
-        /* --- 2. 画像の強制リサイズ設定（はみ出し防止・中央寄せ） --- */
+        /* --- 2. 画像の強制リサイズ（800pxからはみ出さない・中央寄せ） --- */
         img {
-            max-width: 100% !important; /* 親要素（800px）を超えない */
-            height: auto !important;    /* 比率維持 */
+            max-width: 100% !important; /* 親の幅（最大800px）を超えない */
+            height: auto !important;    /* 比率を維持 */
             display: block;
             margin: 0 auto 20px auto;   /* 中央寄せ＆下の余白 */
         }
@@ -71,6 +71,7 @@
             text-align: center; 
             font-weight: bold; 
             border: 1px solid #fbc02d; 
+            line-height: 1.4;
         }
         
         .choice-buttons { 
@@ -92,6 +93,7 @@
             font-weight: bold; 
             transition: all 0.3s; 
             box-shadow: 0 5px 0 #4527a0; 
+            line-height: 1.2;
         }
 
         button:hover:not(:disabled) { background: #5e35b1; transform: translateY(-2px); }
@@ -109,6 +111,7 @@
             padding: 15px; 
             background: #fce4ec; 
             border-radius: 10px; 
+            line-height: 1.4;
         }
         
         .section-title { 
@@ -121,6 +124,8 @@
             display: inline-block; 
         }
 
+        .section-content { margin-bottom: 20px; text-align: justify; font-size: 17px; }
+
         .lucky-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -131,8 +136,10 @@
             border: 1px solid #c5e1a5; 
             margin-top: 20px; 
         }
+        .lucky-item { font-size: 16px; }
+        .item-label { font-weight: bold; color: #388e3c; }
 
-        .notice-card { background: #fff3e0; border-left: 10px solid #ff9800; padding: 20px; margin-top: 40px; font-weight: bold; text-align: center; }
+        .notice-card { background: #fff3e0; border-left: 10px solid #ff9800; padding: 20px; margin-top: 40px; font-weight: bold; text-align: center; color: #e65100; }
 
         /* --- 5. スマホ用レスポンシブ設定 --- */
         @media (max-width: 800px) {
@@ -175,8 +182,8 @@
     </div>
 </div>
 
-<div style="text-align: center; padding: 0 10px;">
-    <p><b>今回のアプリは如何だったでしょうか？他にも使えるアプリ、脳トレができるゲームや趣味に俳句、和歌などが利用できるサイトをご案内します。また大事な記録をサーバーに残せるサイトで、何かあった時に情報開示も指定できるサイトです。スマホのID、PWを記録しておくと安心です。</b></p>
+<div style="text-align: center; padding: 0 10px; margin-bottom: 50px;">
+    <p><span style="font-size: 18px;"><b>今回のアプリは如何だったでしょうか？他にも使えるアプリ、脳トレができるゲームや趣味に俳句、和歌などが利用できるサイトをご案内します。また大事な記録をサーバーに残せるサイトで、何かあった時に情報開示も指定できるサイトです。スマホのID、PWを記録しておくと安心です。</b></span></p>
     
     <img src="https://life-supporter.jp/sp/hxySQ4ff/ct5NJq8Z/images/XS012085.jpg" alt="案内画像">
 
@@ -244,26 +251,44 @@
         if (choice === 'A') {
             text = `<div class="fortune-header">【A】真理の扉：龍が天に昇るような飛躍の日</div>
                     <div class="section-title">🔮 全体運</div>
-                    <div class="section-content">今日のあなたは、澱みのない清流のような決断力を持っています。迷っていたことに終止符を打ち、新しいステージへ進むための扉が目の前で開いています。</div>
+                    <div class="section-content">今日のあなたは、澱みのない清流のような決断力を持っています。迷っていたことに終止符を打ち、新しいステージへ進むための扉が目の前で開いています。直感力が冴え渡っているため、他人の意見よりも「自分の心の声」を優先することが開運の絶対条件です。</div>
+                    <div class="section-title">🔮 仕事・学業運</div>
+                    <div class="section-content">リーダーシップを発揮できる時。あなたの何気ない提案が周囲の目から鱗を落とし、プロジェクトや課題を大きく前進させるでしょう。攻めの姿勢が功を奏します。</div>
+                    <div class="section-title">🔮 対人運</div>
+                    <div class="section-content">憧れの人や、これまで接点のなかった「格上の人物」との縁がつながりやすい日です。自分を小さく見せず、堂々とした振る舞いが良縁を引き寄せます。</div>
                     <div class="lucky-grid">
                         <div class="lucky-item"><span class="item-label">ラッキーカラー：</span> 深紅</div>
                         <div class="lucky-item"><span class="item-label">ラッキーフード：</span> スパイシー料理</div>
+                        <div class="lucky-item"><span class="item-label">アクション：</span> 鏡を見て自分を褒める</div>
+                        <div class="lucky-item"><span class="item-label">重要POINT：</span> 即断即決</div>
                     </div>`;
         } else if (choice === 'B') {
             text = `<div class="fortune-header">【B】慈愛の扉：心に温かな光が灯る癒やしの日</div>
                     <div class="section-title">🔮 全体運</div>
-                    <div class="section-content">今日は「受け取ること」を自分に許可する日です。普段頑張りすぎているあなたへ、周囲や天からのギフトが届きやすい運気です。</div>
+                    <div class="section-content">今日は「受け取ること」を自分に許可する日です。普段頑張りすぎているあなたへ、周囲や天からのギフトが届きやすい運気です。感謝の気持ちを言葉にすることで、そのポジティブなエネルギーが何倍にもなってあなたの元へ返ってくるでしょう。</div>
+                    <div class="section-title">🔮 仕事・学業運</div>
+                    <div class="section-content">効率よりも「丁寧さ」を大切に。資料を整えたり、机を掃除したりする基礎的な行動が、のちに大きな評価として現れます。後輩や仲間のサポートに回るのも吉。</div>
+                    <div class="section-title">🔮 対人運</div>
+                    <div class="section-content">疎遠になっていた友人から連絡があるかもしれません。聞き役に徹することで、あなた自身の心のトゲも溶けていくような、穏やかな時間を過ごせるはずです。</div>
                     <div class="lucky-grid">
                         <div class="lucky-item"><span class="item-label">ラッキーカラー：</span> パステルグリーン</div>
                         <div class="lucky-item"><span class="item-label">ラッキーフード：</span> ハーブティー</div>
+                        <div class="lucky-item"><span class="item-label">アクション：</span> 植物に水をやる</div>
+                        <div class="lucky-item"><span class="item-label">重要POINT：</span> 笑顔の挨拶</div>
                     </div>`;
         } else {
             text = `<div class="fortune-header">【C】創造の扉：未知なる種が芽吹く準備の日</div>
                     <div class="section-title">🔮 全体運</div>
-                    <div class="section-content">大きな変化の前の「静寂」を楽しむ日です。一見、何も起きていないように見えても、水面下では着実に準備が整っています。</div>
+                    <div class="section-content">大きな変化の前の「静寂」を楽しむ日です。一見、何も起きていないように見えても、水面下では着実に準備が整っています。今日は無理に結果を求めず、自分の内側にある知識や経験を整理することに時間を使ってください。</div>
+                    <div class="section-title">🔮 仕事・学業運</div>
+                    <div class="section-content">独創的なアイデアが生まれやすい時です。ノートとペンを持ち歩き、ふと思いついたことをメモしておきましょう。それが数ヶ月後のあなたを助ける大きな武器になります。</div>
+                    <div class="section-title">🔮 対人運</div>
+                    <div class="section-content">一人の時間を大切にすることで、逆にパートナーや家族との絆の深さを再確認できます。言葉で伝えきれない思いは、小さな手紙やプチギフトに託すと吉です。</div>
                     <div class="lucky-grid">
                         <div class="lucky-item"><span class="item-label">ラッキーカラー：</span> ロイヤルブルー</div>
                         <div class="lucky-item"><span class="item-label">ラッキーフード：</span> 根菜のスープ</div>
+                        <div class="lucky-item"><span class="item-label">アクション：</span> 本屋へ行く</div>
+                        <div class="lucky-item"><span class="item-label">重要POINT：</span> 深呼吸と休息</div>
                     </div>`;
         }
         content.innerHTML = text;
